@@ -1,6 +1,9 @@
 package server;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  * Created by Michael on 2017/4/28.
@@ -61,5 +64,26 @@ public class Database {
             }
         }
         return result;
+    }
+    public static void loadUserList(ArrayList<String> userList) {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            connection = DriverManager.getConnection(url, user, password);
+            statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT name FROM users;");
+            while (rs.next()) {
+                userList.add(rs.getString("name"));
+            }
+        } catch (Exception e) {
+            System.out.println("数据库loadList错误！");
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

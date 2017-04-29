@@ -14,19 +14,24 @@ public class ReadThread implements Runnable {
     }
     @Override
     public void run() {
-        try {
-            DataInputStream input = new DataInputStream(socket.getInputStream());
-            while (true) {
+        boolean flag = true;
+        while (flag) {
+            try {
+                DataInputStream input = new DataInputStream(socket.getInputStream());
                 String msg = input.readUTF();
                 String[] msgs = msg.trim().split("#");
                 if (msgs[0].equals("msg")) {
                     System.out.println(msgs[1] + ":" + msgs[2]);
                 }
+            } catch (Exception e) {
+                flag = false;
             }
-        } catch (Exception e) {
-            System.out.println("ReadThread:客户端读进程错误！");
-            e.printStackTrace();
         }
+
+
+
+
+
 
     }
 }

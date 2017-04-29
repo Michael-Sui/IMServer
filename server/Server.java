@@ -3,8 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Michael on 2017/4/16.
@@ -14,12 +13,13 @@ public class Server {
     public static int getPORT() {
         return PORT;
     }
-    private static List<User> usersList = new ArrayList<User>();
-    public static List<User> getList() {
-        return usersList;
-    }
+    public static ArrayList<User> loginList = new ArrayList<User>();
+    public static ArrayList<String> userList = new ArrayList<String>();
+    public static HashMap<String, Queue<String>> messageList = new HashMap<String, Queue<String>>();
     private void init() {
         try {
+            Database.loadUserList(userList);
+            loadMessageList(messageList);
             ServerSocket serverSocket = new ServerSocket(PORT);
             while (true) {
                 Socket client = serverSocket.accept();
@@ -29,15 +29,26 @@ public class Server {
                 boolean flag = false;
                 if (msgs[0].equals("logIn")) {
                     flag = Database.logIn(msgs[1], msgs[2]);
+                    user.setName(msgs[1]);
                 } else if (msgs[0].equals("signUp")) {
                     flag = Database.signUp(msgs[1], msgs[2]);
+                    if (flag) {
+                        Server.userList.add(msgs[1]);
+                    }
                 }
-                if (flag) {
-                    user.setName(msgs[1]);
-                    usersList.add(user);
-                    new Thread(new ServerThread(user)).start();
+                boolean hasLogin = false;
+                for (User u : loginList) {
+                    if (u != null && u.getName().equals(msgs[1])) {
+                        hasLogin = true;
+                    }
+                }
+                if (flag && !hasLogin) {
+                    new Thread(new RecvThread(user)).start();
+                    new Thread(new SendThread(user)).start();
+                    Server.loginList.add(user);
+                    user.getOutput().writeUTF("msg#Server#登陆成功");
                 } else {
-                    System.out.println("Server:连接服务器失败！");
+                    user.getOutput().writeUTF("msg#Server#登录失败");
                     client.close();
                 }
             }
@@ -46,6 +57,13 @@ public class Server {
         }
 
     }
+
+    private void loadMessageList(HashMap<String, Queue<String>> messageList) {
+        for (String name : userList) {
+            messageList.put(name, new LinkedList<String>());
+        }
+    }
+
     public static void main(String[] args) {
         System.out.println("Server:服务器已经启动！");
         Server server = new Server();
