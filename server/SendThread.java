@@ -19,9 +19,9 @@ public class SendThread implements Runnable {
                 }
             } catch (Exception e) {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(3000);
                 } catch (Exception ee) {
-
+                    System.out.println("线程休眠失败！");
                 }
             }
         }
