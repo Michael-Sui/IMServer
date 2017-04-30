@@ -9,9 +9,11 @@ import java.net.Socket;
  */
 public class ReadThread implements Runnable {
     private Socket socket;
+
     public ReadThread(Socket socket) {
         this.socket = socket;
     }
+
     @Override
     public void run() {
         boolean flag = true;
@@ -25,6 +27,8 @@ public class ReadThread implements Runnable {
                 }
             } catch (Exception e) {
                 flag = false;
+                System.out.println("ReadThread:客户端读进程错误！");
+                e.printStackTrace();
             }
         }
 

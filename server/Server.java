@@ -10,12 +10,26 @@ import java.util.*;
  */
 public class Server {
     private static final int PORT = 10001;
-    public static int getPORT() {
-        return PORT;
-    }
     public static ArrayList<User> loginList = new ArrayList<User>();
     public static ArrayList<String> userList = new ArrayList<String>();
     public static HashMap<String, Queue<String>> messageList = new HashMap<String, Queue<String>>();
+
+    public static int getPORT() {
+        return PORT;
+    }
+
+    private void loadMessageList(HashMap<String, Queue<String>> messageList) {
+        for (String name : userList) {
+            messageList.put(name, new LinkedList<String>());
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Server:服务器已经启动！");
+        Server server = new Server();
+        server.init();
+    }
+
     private void init() {
         try {
             Database.loadUserList(userList);
@@ -43,9 +57,9 @@ public class Server {
                     }
                 }
                 if (flag && !hasLogin) {
+                    Server.loginList.add(user);
                     new Thread(new RecvThread(user)).start();
                     new Thread(new SendThread(user)).start();
-                    Server.loginList.add(user);
                     user.getOutput().writeUTF("msg#Server#登陆成功");
                 } else {
                     user.getOutput().writeUTF("msg#Server#登录失败");
@@ -53,20 +67,9 @@ public class Server {
                 }
             }
         } catch (Exception e) {
+            System.out.println("Server:服务器错误");
             e.printStackTrace();
         }
 
-    }
-
-    private void loadMessageList(HashMap<String, Queue<String>> messageList) {
-        for (String name : userList) {
-            messageList.put(name, new LinkedList<String>());
-        }
-    }
-
-    public static void main(String[] args) {
-        System.out.println("Server:服务器已经启动！");
-        Server server = new Server();
-        server.init();
     }
 }

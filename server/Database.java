@@ -16,6 +16,7 @@ public class Database {
     private static final String url = "jdbc:mysql://" + serverName + "/" + database + "?useSSL=false";
     private static final String user = "root";
     private static final String password = "mysql";
+
     public static boolean logIn(String name, String pwd) {
         boolean result = false;
         try {
@@ -39,6 +40,7 @@ public class Database {
         }
         return result;
     }
+
     public static boolean signUp(String name, String pwd) {
         boolean result = false;
         try {
@@ -65,6 +67,7 @@ public class Database {
         }
         return result;
     }
+
     public static void loadUserList(ArrayList<String> userList) {
         try {
             Class.forName("com.mysql.jdbc.Driver");

@@ -11,15 +11,19 @@ import java.net.Socket;
 public class User {
     private Socket client;
     private String name;
+
     public User(Socket client) {
         this.client = client;
     }
+
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public DataInputStream getInput() {
         DataInputStream input = null;
         try {
@@ -30,6 +34,7 @@ public class User {
         }
         return input;
     }
+
     public DataOutputStream getOutput() {
         DataOutputStream output = null;
         try {

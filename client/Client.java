@@ -9,6 +9,7 @@ import java.net.Socket;
 public class Client {
     private static final String IP = "127.0.0.1";
     private static final int PORT = 10001;
+
     public static void main(String[] args) {
         try {
             Socket socket = new Socket(IP, PORT);

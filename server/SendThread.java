@@ -10,18 +10,29 @@ public class SendThread implements Runnable {
     }
     @Override
     public void run() {
-        while (true) {
+        boolean flag = true;
+        while (flag) {
             try {
+                if (!Server.loginList.contains(user)) {
+                    flag = false;
+                    break;
+                }
                 String msg = Server.messageList.get(user.getName()).poll();
+                System.out.println("msgSend:" + msg);
                 if (msg != null) {
                     user.getOutput().writeUTF(msg);
                     user.getOutput().flush();
+                } else {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (Exception ee) {
+                        System.out.println("SendThread:线程休眠失败！");
+                    }
                 }
             } catch (Exception e) {
-                try {
-                    Thread.sleep(3000);
-                } catch (Exception ee) {
-                    System.out.println("线程休眠失败！");
+                flag = false;
+                if (Server.loginList.contains(user)) {
+                    Server.loginList.remove(user);
                 }
             }
         }

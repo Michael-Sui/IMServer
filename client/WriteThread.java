@@ -10,11 +10,14 @@ import java.util.Scanner;
  */
 public class WriteThread implements Runnable {
     private Socket socket;
+
     public WriteThread(Socket sockst) {
         this.socket = sockst;
     }
+
     @Override
     public void run() {
+        boolean flag = true;
         try {
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
             Scanner scanner = new Scanner(System.in);
@@ -22,13 +25,14 @@ public class WriteThread implements Runnable {
             String pwd = scanner.nextLine();
             output.writeUTF("logIn#" + name + "#" + pwd);
             output.flush();
-            while (true) {
+            while (flag) {
                 String friend = scanner.nextLine();
                 String message = scanner.nextLine();
                 output.writeUTF("msg#" + friend + "#" + message);
                 output.flush();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            flag = false;
             System.out.println("WriteThread:客户端写进程错误！");
             e.printStackTrace();
         }
