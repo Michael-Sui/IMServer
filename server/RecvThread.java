@@ -19,7 +19,6 @@ public class RecvThread implements Runnable {
                 if (!Server.loginList.contains(user)) {
                     flag = false;
                     break;
-
                 }
                 String msg = user.getInput().readUTF();
                 System.out.println("msgRecv:" + msg);

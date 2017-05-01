@@ -5,9 +5,11 @@ package server;
  */
 public class SendThread implements Runnable {
     private User user;
+
     public SendThread(User user) {
         this.user = user;
     }
+
     @Override
     public void run() {
         boolean flag = true;
