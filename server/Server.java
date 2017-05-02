@@ -1,6 +1,5 @@
 package server;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -9,13 +8,32 @@ import java.util.*;
  * Created by Michael on 2017/4/16.
  */
 public class Server {
-    private static final int PORT = 10001;
-    public static ArrayList<User> loginList = new ArrayList<User>();
-    public static ArrayList<String> userList = new ArrayList<String>();
-    public static HashMap<String, Queue<String>> messageList = new HashMap<String, Queue<String>>();
+    private final int PORT;
+    private ArrayList<User> loginList;
+    private ArrayList<String> userList;
+    private HashMap<String, Queue<String>> messageList;
+    private Database database;
+    private static Server instance;
 
-    public static int getPORT() {
-        return PORT;
+    public Server() {
+        PORT = 10001;
+        loginList = new ArrayList<User>();
+        userList = new ArrayList<String>();
+        messageList = new HashMap<String, Queue<String>>();
+        database = new Database();
+        Server.instance = this;
+    }
+
+    public static Server getInstance() {
+        return Server.instance;
+    }
+
+    public ArrayList<User> getLoginList() {
+        return this.loginList;
+    }
+
+    public HashMap<String, Queue<String>> getMessageList() {
+        return this.messageList;
     }
 
     private void loadMessageList(HashMap<String, Queue<String>> messageList) {
@@ -24,16 +42,10 @@ public class Server {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("Server:服务器已经启动！");
-        Server server = new Server();
-        server.init();
-    }
-
     private void init() {
         try {
-            Database.loadUserList(userList);
-            loadMessageList(messageList);
+            database.loadUserList(userList);
+            this.loadMessageList(messageList);
             ServerSocket serverSocket = new ServerSocket(PORT);
             while (true) {
                 Socket client = serverSocket.accept();
@@ -42,12 +54,12 @@ public class Server {
                 String[] msgs = msg.trim().split("#");
                 boolean flag = false;
                 if (msgs[0].equals("logIn")) {
-                    flag = Database.logIn(msgs[1], msgs[2]);
+                    flag = database.logIn(msgs[1], msgs[2]);
                     user.setName(msgs[1]);
                 } else if (msgs[0].equals("signUp")) {
-                    flag = Database.signUp(msgs[1], msgs[2]);
+                    flag = database.signUp(msgs[1], msgs[2]);
                     if (flag) {
-                        Server.userList.add(msgs[1]);
+                        this.userList.add(msgs[1]);
                     }
                 }
                 boolean hasLogin = false;
@@ -57,12 +69,14 @@ public class Server {
                     }
                 }
                 if (flag && !hasLogin) {
-                    Server.loginList.add(user);
+                    user.getOutput().writeUTF("msg#Server#SUCCESS");
+                    user.getOutput().flush();
+                    this.loginList.add(user);
                     new Thread(new RecvThread(user)).start();
                     new Thread(new SendThread(user)).start();
-                    user.getOutput().writeUTF("msg#Server#登陆成功");
                 } else {
-                    user.getOutput().writeUTF("msg#Server#登录失败");
+                    user.getOutput().writeUTF("msg#Server#FAIL");
+                    user.getOutput().flush();
                     client.close();
                 }
             }
@@ -71,5 +85,10 @@ public class Server {
             e.printStackTrace();
         }
 
+    }
+
+    public static void main(String[] args) {
+        Server server = new Server();
+        server.init();
     }
 }

@@ -1,29 +1,42 @@
 package server;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 /**
  * Created by Michael on 2017/4/28.
  */
 public class Database {
-    private static Connection connection = null;
-    private static Statement statement = null;
-    private static final String serverName = "127.0.0.1";
-    private static final String database = "im";
-    private static final String url = "jdbc:mysql://" + serverName + "/" + database + "?useSSL=false";
-    private static final String user = "root";
-    private static final String password = "mysql";
+    private Connection connection;
+    private PreparedStatement statement;
+    private final String serverName;
+    private final String database;
+    private final String url;
+    private final String user;
+    private final String password;
 
-    public static boolean logIn(String name, String pwd) {
+    public Database() {
+        connection = null;
+        statement = null;
+        serverName = "127.0.0.1";
+        database = "im";
+        url = "jdbc:mysql://" + serverName + "/" + database + "?useSSL=false";
+        user = "root";
+        password = "mysql";
+    }
+
+    public boolean logIn(String name, String pwd) {
         boolean result = false;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
-            statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM users WHERE NAME = '" + name + "';");
+            String sql = "SELECT * FROM users WHERE NAME = ?;";
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, name);
+            ResultSet rs = statement.executeQuery();
             if (rs.next() && rs.getString("pwd").equals(pwd)) {
                 result = true;
             }
@@ -41,17 +54,23 @@ public class Database {
         return result;
     }
 
-    public static boolean signUp(String name, String pwd) {
+    public boolean signUp(String name, String pwd) {
         boolean result = false;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
-            statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM users WHERE NAME = '" + name + "';");
+            String sql = "SELECT * FROM users WHERE NAME = ?;";
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, name);
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 result = false;
             } else {
-                statement.executeUpdate("INSERT INTO users VALUES ('" + name + "','" + pwd + "');");
+                sql = "INSERT INTO users VALUES (?, ?);";
+                statement = connection.prepareStatement(sql);
+                statement.setString(1, name);
+                statement.setString(2, pwd);
+                statement.execute();
                 result = true;
             }
         } catch (Exception e) {
@@ -68,11 +87,12 @@ public class Database {
         return result;
     }
 
-    public static void loadUserList(ArrayList<String> userList) {
+    public void loadUserList(ArrayList<String> userList) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
-            statement = connection.createStatement();
+            String sql = "SELECT name FROM users;";
+            statement = connection.prepareStatement(sql);
             ResultSet rs = statement.executeQuery("SELECT name FROM users;");
             while (rs.next()) {
                 userList.add(rs.getString("name"));

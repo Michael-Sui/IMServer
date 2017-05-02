@@ -7,10 +7,15 @@ import java.net.Socket;
  * Created by Michael on 2017/4/16.
  */
 public class Client {
-    private static final String IP = "127.0.0.1";
-    private static final int PORT = 10001;
+    private final String IP;
+    private final int PORT;
 
-    public static void main(String[] args) {
+    public Client() {
+        IP = "127.0.0.1";
+        PORT = 10001;
+    }
+
+    public void init() {
         try {
             Socket socket = new Socket(IP, PORT);
             new Thread(new ReadThread(socket)).start();
@@ -19,6 +24,10 @@ public class Client {
             System.out.println("Client:客户端错误！");
             e.printStackTrace();
         }
+    }
 
+    public static void main(String[] args) {
+        Client client = new Client();
+        client.init();
     }
 }

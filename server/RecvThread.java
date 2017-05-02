@@ -6,30 +6,31 @@ package server;
 public class RecvThread implements Runnable {
     private User user;
     private boolean flag;
+    private Server server;
 
     public RecvThread(User user) {
         this.user = user;
         flag = true;
+        server = Server.getInstance();
     }
 
     @Override
     public void run() {
         while (flag) {
             try {
-                if (!Server.loginList.contains(user)) {
+                if (!server.getLoginList().contains(user)) {
                     flag = false;
                     break;
                 }
                 String msg = user.getInput().readUTF();
-                System.out.println("msgRecv:" + msg);
                 String[] msgs = msg.trim().split("#");
                 if (msgs[0].equals("msg")) {
-                    Server.messageList.get(msgs[1]).offer("msg#" + user.getName() + "#" + msgs[2]);
+                    server.getMessageList().get(msgs[1]).offer("msg#" + user.getName() + "#" + msgs[2]);
                 }
             } catch (Exception e) {
                 flag = false;
-                if (Server.loginList.contains(user)) {
-                    Server.loginList.remove(user);
+                if (server.getLoginList().contains(user)) {
+                    server.getLoginList().remove(user);
                 }
             }
         }
