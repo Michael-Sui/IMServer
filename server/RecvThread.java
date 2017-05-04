@@ -25,7 +25,9 @@ public class RecvThread implements Runnable {
                 String msg = user.getInput().readUTF();
                 String[] msgs = msg.trim().split("#");
                 if (msgs[0].equals("msg")) {
-                    server.getMessageList().get(msgs[1]).offer("msg#" + user.getName() + "#" + msgs[2]);
+                    if (server.getMessageList().get(msgs[1]) != null) {
+                        server.getMessageList().get(msgs[1]).offer("msg#" + user.getName() + "#" + msgs[2]);
+                    }
                 }
             } catch (Exception e) {
                 flag = false;
