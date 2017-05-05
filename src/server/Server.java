@@ -58,8 +58,10 @@ public class Server {
                     user.setName(msgs[1]);
                 } else if (msgs[0].equals("signUp")) {
                     flag = database.signUp(msgs[1], msgs[2]);
+                    user.setName(msgs[1]);
                     if (flag) {
                         this.userList.add(msgs[1]);
+                        this.messageList.put(msgs[1], new LinkedList<String>());
                     }
                 }
                 boolean hasLogin = false;
